@@ -21,7 +21,6 @@ export default function App() {
     if (storedName) setName(storedName);
     if (storedBoard) setLeaderboard(JSON.parse(storedBoard));
 
-    // Load global leaderboard
     fetchLeaderboard(db).then(setGlobalBoard);
   }, []);
 
@@ -105,9 +104,6 @@ export default function App() {
   if (!name) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-4">
-        <p className="text-xs text-yellow-400 mb-2">
-          Firebase project: {import.meta.env.VITE_FIREBASE_PROJECT_ID || 'NOT SET'}
-        </p>
         <h1 className="text-3xl font-bold mb-4">Enter Your Name</h1>
         <input
           type="text"
@@ -130,10 +126,6 @@ export default function App() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-4">
-      <p className="text-xs text-yellow-400 mb-2">
-        Firebase project: {import.meta.env.VITE_FIREBASE_PROJECT_ID || 'NOT SET'}
-      </p>
-
       <h1 className="text-3xl font-bold mb-2">Rock Paper Scissors</h1>
       <p className="mb-4">Welcome, <span className="font-semibold">{name}</span></p>
 
