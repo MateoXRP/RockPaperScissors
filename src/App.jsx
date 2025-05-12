@@ -29,7 +29,7 @@ export default function App() {
     if (found) setPlayerStats(found);
   };
 
-  const updateLeaderboard = (winInc = 0, lossInc = 0, tieInc = 0) => {
+  const updateLeaderboard = async (winInc = 0, lossInc = 0, tieInc = 0) => {
     const updated = {
       name,
       wins: playerStats.wins + winInc,
@@ -37,8 +37,8 @@ export default function App() {
       ties: playerStats.ties + tieInc,
     };
     setPlayerStats(updated);
-    submitScore(db, name, winInc, lossInc, tieInc);
-    fetchAndSetLeaderboard(name);
+    await submitScore(db, name, winInc, lossInc, tieInc);
+    await fetchAndSetLeaderboard(name);
   };
 
   const play = (choice) => {
