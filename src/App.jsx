@@ -136,7 +136,12 @@ export default function App() {
         <div className="text-center mb-4">
           <p>You chose: {capitalize(userChoice)}</p>
           <p>Computer chose: {capitalize(computerChoice)}</p>
-          <p className="mt-2 font-semibold text-xl">{result}</p>
+          <p
+            key={result}
+            className="mt-2 font-semibold text-xl opacity-0 scale-90 animate-fadeIn"
+          >
+            {result}
+          </p>
         </div>
       )}
 
