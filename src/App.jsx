@@ -12,32 +12,29 @@ export default function App() {
   const [computerChoice, setComputerChoice] = useState(null);
   const [result, setResult] = useState("");
   const [resultKey, setResultKey] = useState(0);
-  const [leaderboard, setLeaderboard] = useState({});
   const [globalBoard, setGlobalBoard] = useState([]);
+  const [playerStats, setPlayerStats] = useState({ wins: 0, losses: 0, ties: 0 });
   const [isAnimating, setIsAnimating] = useState(false);
-  const [finalComputerChoice, setFinalComputerChoice] = useState(null);
 
   useEffect(() => {
     const storedName = Cookies.get("playerName");
-    const storedBoard = Cookies.get("leaderboard");
     if (storedName) setName(storedName);
-    if (storedBoard) setLeaderboard(JSON.parse(storedBoard));
-
     fetchLeaderboard(db).then(setGlobalBoard);
   }, []);
 
+  useEffect(() => {
+    const found = globalBoard.find((entry) => entry.name === name);
+    if (found) setPlayerStats(found);
+  }, [globalBoard, name]);
+
   const updateLeaderboard = (winInc = 0, lossInc = 0, tieInc = 0) => {
     const updated = {
-      ...leaderboard,
-      [name]: {
-        wins: (leaderboard[name]?.wins || 0) + winInc,
-        losses: (leaderboard[name]?.losses || 0) + lossInc,
-        ties: (leaderboard[name]?.ties || 0) + tieInc,
-      },
+      name,
+      wins: playerStats.wins + winInc,
+      losses: playerStats.losses + lossInc,
+      ties: playerStats.ties + tieInc,
     };
-    setLeaderboard(updated);
-    Cookies.set("leaderboard", JSON.stringify(updated));
-
+    setPlayerStats(updated);
     submitScore(db, name, winInc, lossInc, tieInc);
     fetchLeaderboard(db).then(setGlobalBoard);
   };
@@ -45,7 +42,6 @@ export default function App() {
   const play = (choice) => {
     setUserChoice(choice);
     setComputerChoice(null);
-    setFinalComputerChoice(null);
     setResult("");
     setIsAnimating(true);
 
@@ -60,7 +56,6 @@ export default function App() {
         setTimeout(playAnimationStep, animationSequence[counter]);
       } else {
         const finalChoice = choices[Math.floor(Math.random() * 3)];
-        setFinalComputerChoice(finalChoice);
         setComputerChoice(finalChoice);
         finalizeGame(choice, finalChoice);
         setIsAnimating(false);
@@ -94,21 +89,6 @@ export default function App() {
     if (!nameInput.trim()) return;
     setName(nameInput.trim());
     Cookies.set("playerName", nameInput.trim());
-  };
-
-  const resetPlayer = () => {
-    const updated = { ...leaderboard };
-    delete updated[name];
-    setLeaderboard(updated);
-    Cookies.set("leaderboard", JSON.stringify(updated));
-    setResult("");
-    setUserChoice(null);
-    setComputerChoice(null);
-  };
-
-  const resetLeaderboard = () => {
-    setLeaderboard({});
-    Cookies.remove("leaderboard");
   };
 
   const logout = () => {
@@ -151,7 +131,7 @@ export default function App() {
     );
   }
 
-  const { wins = 0, losses = 0, ties = 0 } = leaderboard[name] || {};
+  const { wins = 0, losses = 0, ties = 0 } = playerStats;
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-4">
@@ -194,25 +174,9 @@ export default function App() {
         <p>🤝 Ties: {ties}</p>
       </div>
 
-      <button onClick={resetPlayer} className="bg-yellow-600 px-4 py-2 rounded hover:bg-yellow-700 mb-2">
-        Reset My Stats
-      </button>
-
       <button onClick={logout} className="bg-gray-700 px-4 py-2 rounded hover:bg-gray-800 mb-4">
         Switch Player
       </button>
-
-      <h2 className="text-xl font-bold mt-6 mb-2">🏅 Local Leaderboard</h2>
-      <ul className="mb-4">
-        {Object.entries(leaderboard)
-          .sort(([, a], [, b]) => (b.wins - b.losses) - (a.wins - a.losses))
-          .map(([player, score]) => (
-            <li key={player} className="text-sm">
-              {player}: {score.wins}W / {score.losses}L / {score.ties}T &nbsp;
-              <span className="text-yellow-400 font-semibold">(Net: {score.wins - score.losses})</span>
-            </li>
-        ))}
-      </ul>
 
       <h2 className="text-xl font-bold mt-6 mb-2">🌍 Global Leaderboard</h2>
       <ul className="mb-4">
@@ -225,10 +189,6 @@ export default function App() {
           </li>
         ))}
       </ul>
-
-      <button onClick={resetLeaderboard} className="bg-red-600 px-4 py-2 rounded hover:bg-red-700">
-        Reset Leaderboard
-      </button>
     </div>
   );
 }
