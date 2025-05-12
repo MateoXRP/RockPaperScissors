@@ -1,47 +1,149 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Cookies from "js-cookie";
 
 const choices = ["rock", "paper", "scissors"];
 
 export default function App() {
+  const [name, setName] = useState("");
+  const [nameInput, setNameInput] = useState("");
   const [userChoice, setUserChoice] = useState(null);
   const [computerChoice, setComputerChoice] = useState(null);
   const [result, setResult] = useState("");
+  const [leaderboard, setLeaderboard] = useState({});
+
+  // Load name and leaderboard from cookies
+  useEffect(() => {
+    const storedName = Cookies.get("playerName");
+    const storedBoard = Cookies.get("leaderboard");
+    if (storedName) setName(storedName);
+    if (storedBoard) setLeaderboard(JSON.parse(storedBoard));
+  }, []);
+
+  const updateLeaderboard = (winInc = 0, lossInc = 0, tieInc = 0) => {
+    const updated = {
+      ...leaderboard,
+      [name]: {
+        wins: (leaderboard[name]?.wins || 0) + winInc,
+        losses: (leaderboard[name]?.losses || 0) + lossInc,
+        ties: (leaderboard[name]?.ties || 0) + tieInc,
+      },
+    };
+    setLeaderboard(updated);
+    Cookies.set("leaderboard", JSON.stringify(updated));
+  };
 
   const play = (choice) => {
     const comp = choices[Math.floor(Math.random() * 3)];
     setUserChoice(choice);
     setComputerChoice(comp);
 
-    if (choice === comp) setResult("It's a tie!");
-    else if (
+    if (choice === comp) {
+      setResult("It's a tie!");
+      updateLeaderboard(0, 0, 1);
+    } else if (
       (choice === "rock" && comp === "scissors") ||
       (choice === "paper" && comp === "rock") ||
       (choice === "scissors" && comp === "paper")
-    ) setResult("You win!");
-    else setResult("You lose!");
+    ) {
+      setResult("You win!");
+      updateLeaderboard(1, 0, 0);
+    } else {
+      setResult("You lose!");
+      updateLeaderboard(0, 1, 0);
+    }
   };
+
+  const saveName = () => {
+    if (!nameInput.trim()) return;
+    setName(nameInput.trim());
+    Cookies.set("playerName", nameInput.trim());
+  };
+
+  const resetPlayer = () => {
+    const updated = { ...leaderboard };
+    delete updated[name];
+    setLeaderboard(updated);
+    Cookies.set("leaderboard", JSON.stringify(updated));
+    setResult("");
+    setUserChoice(null);
+    setComputerChoice(null);
+  };
+
+  const resetLeaderboard = () => {
+    setLeaderboard({});
+    Cookies.remove("leaderboard");
+  };
+
+  if (!name) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-4">
+        <h1 className="text-3xl font-bold mb-4">Enter Your Name</h1>
+        <input
+          type="text"
+          value={nameInput}
+          onChange={(e) => setNameInput(e.target.value)}
+          className="px-4 py-2 text-black rounded mb-2"
+          placeholder="Your name"
+        />
+        <button
+          onClick={saveName}
+          className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Start Game
+        </button>
+      </div>
+    );
+  }
+
+  const { wins = 0, losses = 0, ties = 0 } = leaderboard[name] || {};
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-4">
-      <h1 className="text-3xl font-bold mb-4">Rock Paper Scissors</h1>
+      <h1 className="text-3xl font-bold mb-2">Rock Paper Scissors</h1>
+      <p className="mb-4">Welcome, <span className="font-semibold">{name}</span></p>
+
       <div className="space-x-4 mb-4">
         {choices.map((choice) => (
           <button
             key={choice}
             onClick={() => play(choice)}
-            className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
+            className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 capitalize"
           >
             {choice}
           </button>
         ))}
       </div>
+
       {userChoice && computerChoice && (
-        <div className="text-center">
+        <div className="text-center mb-4">
           <p>You chose: {userChoice}</p>
           <p>Computer chose: {computerChoice}</p>
           <p className="mt-2 font-semibold text-xl">{result}</p>
         </div>
       )}
+
+      <div className="text-center mb-4">
+        <p>🏆 Wins: {wins}</p>
+        <p>💥 Losses: {losses}</p>
+        <p>🤝 Ties: {ties}</p>
+      </div>
+
+      <button onClick={resetPlayer} className="bg-yellow-600 px-4 py-2 rounded hover:bg-yellow-700 mb-2">
+        Reset My Stats
+      </button>
+
+      <h2 className="text-xl font-bold mt-6 mb-2">🏅 Leaderboard</h2>
+      <ul className="mb-4">
+        {Object.entries(leaderboard).map(([player, score]) => (
+          <li key={player} className="text-sm">
+            {player}: {score.wins}W / {score.losses}L / {score.ties}T
+          </li>
+        ))}
+      </ul>
+
+      <button onClick={resetLeaderboard} className="bg-red-600 px-4 py-2 rounded hover:bg-red-700">
+        Reset Leaderboard
+      </button>
     </div>
   );
 }
