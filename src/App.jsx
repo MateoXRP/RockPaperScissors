@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 
 const choices = ["rock", "paper", "scissors"];
-
 const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
 export default function App() {
@@ -125,7 +124,7 @@ export default function App() {
           <button
             key={choice}
             onClick={() => play(choice)}
-            className="bg-blue-600 px-6 py-3 rounded hover:bg-blue-700 capitalize flex flex-col items-center w-24 h-24 justify-center space-y-1"
+            className="bg-blue-600 px-6 py-3 rounded capitalize flex flex-col items-center w-24 h-24 justify-center space-y-1 transform transition-transform duration-200 hover:scale-110 hover:rotate-3 hover:shadow-lg"
           >
             <span className="text-2xl">{getIcon(choice)}</span>
             <span className="text-sm">{choice}</span>
