@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
+import { db, submitScore, fetchLeaderboard } from "./firebase";
 
 const choices = ["rock", "paper", "scissors"];
 const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
@@ -12,12 +13,16 @@ export default function App() {
   const [result, setResult] = useState("");
   const [resultKey, setResultKey] = useState(0);
   const [leaderboard, setLeaderboard] = useState({});
+  const [globalBoard, setGlobalBoard] = useState([]);
 
   useEffect(() => {
     const storedName = Cookies.get("playerName");
     const storedBoard = Cookies.get("leaderboard");
     if (storedName) setName(storedName);
     if (storedBoard) setLeaderboard(JSON.parse(storedBoard));
+
+    // Load global leaderboard
+    fetchLeaderboard(db).then(setGlobalBoard);
   }, []);
 
   const updateLeaderboard = (winInc = 0, lossInc = 0, tieInc = 0) => {
@@ -31,6 +36,12 @@ export default function App() {
     };
     setLeaderboard(updated);
     Cookies.set("leaderboard", JSON.stringify(updated));
+
+    // Submit score to Firebase
+    submitScore(db, name, winInc, lossInc, tieInc);
+
+    // Refresh global board
+    fetchLeaderboard(db).then(setGlobalBoard);
   };
 
   const play = (choice) => {
@@ -166,7 +177,7 @@ export default function App() {
         Switch Player
       </button>
 
-      <h2 className="text-xl font-bold mt-6 mb-2">🏅 Leaderboard</h2>
+      <h2 className="text-xl font-bold mt-6 mb-2">🏅 Local Leaderboard</h2>
       <ul className="mb-4">
         {Object.entries(leaderboard)
           .sort(([, a], [, b]) => (b.wins - b.losses) - (a.wins - a.losses))
@@ -175,6 +186,18 @@ export default function App() {
               {player}: {score.wins}W / {score.losses}L / {score.ties}T &nbsp;
               <span className="text-yellow-400 font-semibold">(Net: {score.wins - score.losses})</span>
             </li>
+        ))}
+      </ul>
+
+      <h2 className="text-xl font-bold mt-6 mb-2">🌍 Global Leaderboard</h2>
+      <ul className="mb-4">
+        {globalBoard.map((player) => (
+          <li key={player.name} className="text-sm">
+            {player.name}: {player.wins}W / {player.losses}L / {player.ties}T
+            <span className="text-yellow-400 font-semibold ml-2">
+              (Net: {player.wins - player.losses})
+            </span>
+          </li>
         ))}
       </ul>
 
