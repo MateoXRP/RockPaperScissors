@@ -11,7 +11,6 @@ export default function App() {
   const [result, setResult] = useState("");
   const [leaderboard, setLeaderboard] = useState({});
 
-  // Load name and leaderboard from cookies
   useEffect(() => {
     const storedName = Cookies.get("playerName");
     const storedBoard = Cookies.get("leaderboard");
@@ -74,6 +73,23 @@ export default function App() {
     Cookies.remove("leaderboard");
   };
 
+  const logout = () => {
+    Cookies.remove("playerName");
+    setName("");
+    setUserChoice(null);
+    setComputerChoice(null);
+    setResult("");
+  };
+
+  const getIcon = (choice) => {
+    switch (choice) {
+      case "rock": return "🪨";
+      case "paper": return "📄";
+      case "scissors": return "✂️";
+      default: return "";
+    }
+  };
+
   if (!name) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-4">
@@ -102,14 +118,15 @@ export default function App() {
       <h1 className="text-3xl font-bold mb-2">Rock Paper Scissors</h1>
       <p className="mb-4">Welcome, <span className="font-semibold">{name}</span></p>
 
-      <div className="space-x-4 mb-4">
+      <div className="flex space-x-4 mb-4">
         {choices.map((choice) => (
           <button
             key={choice}
             onClick={() => play(choice)}
-            className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 capitalize"
+            className="bg-blue-600 px-6 py-3 rounded hover:bg-blue-700 capitalize flex flex-col items-center w-24 h-24 justify-center space-y-1"
           >
-            {choice}
+            <span className="text-2xl">{getIcon(choice)}</span>
+            <span className="text-sm">{choice}</span>
           </button>
         ))}
       </div>
@@ -130,6 +147,10 @@ export default function App() {
 
       <button onClick={resetPlayer} className="bg-yellow-600 px-4 py-2 rounded hover:bg-yellow-700 mb-2">
         Reset My Stats
+      </button>
+
+      <button onClick={logout} className="bg-gray-700 px-4 py-2 rounded hover:bg-gray-800 mb-4">
+        Switch Player
       </button>
 
       <h2 className="text-xl font-bold mt-6 mb-2">🏅 Leaderboard</h2>
