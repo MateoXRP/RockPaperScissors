@@ -3,6 +3,8 @@ import Cookies from "js-cookie";
 
 const choices = ["rock", "paper", "scissors"];
 
+const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+
 export default function App() {
   const [name, setName] = useState("");
   const [nameInput, setNameInput] = useState("");
@@ -133,8 +135,8 @@ export default function App() {
 
       {userChoice && computerChoice && (
         <div className="text-center mb-4">
-          <p>You chose: {userChoice}</p>
-          <p>Computer chose: {computerChoice}</p>
+          <p>You chose: {capitalize(userChoice)}</p>
+          <p>Computer chose: {capitalize(computerChoice)}</p>
           <p className="mt-2 font-semibold text-xl">{result}</p>
         </div>
       )}
