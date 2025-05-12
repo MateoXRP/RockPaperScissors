@@ -10,6 +10,7 @@ export default function App() {
   const [userChoice, setUserChoice] = useState(null);
   const [computerChoice, setComputerChoice] = useState(null);
   const [result, setResult] = useState("");
+  const [resultKey, setResultKey] = useState(0);
   const [leaderboard, setLeaderboard] = useState({});
 
   useEffect(() => {
@@ -51,6 +52,9 @@ export default function App() {
       setResult("You lose!");
       updateLeaderboard(0, 1, 0);
     }
+
+    // Ensure animation re-triggers even for same result
+    setResultKey(Date.now());
   };
 
   const saveName = () => {
@@ -137,7 +141,7 @@ export default function App() {
           <p>You chose: {capitalize(userChoice)}</p>
           <p>Computer chose: {capitalize(computerChoice)}</p>
           <p
-            key={result}
+            key={resultKey}
             className="mt-2 font-semibold text-xl opacity-0 scale-90 animate-fadeIn"
           >
             {result}
