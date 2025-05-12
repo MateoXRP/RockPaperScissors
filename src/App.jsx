@@ -53,8 +53,7 @@ export default function App() {
       updateLeaderboard(0, 1, 0);
     }
 
-    // Ensure animation re-triggers even for same result
-    setResultKey(Date.now());
+    setResultKey(Date.now()); // force animation
   };
 
   const saveName = () => {
@@ -165,10 +164,13 @@ export default function App() {
 
       <h2 className="text-xl font-bold mt-6 mb-2">🏅 Leaderboard</h2>
       <ul className="mb-4">
-        {Object.entries(leaderboard).map(([player, score]) => (
-          <li key={player} className="text-sm">
-            {player}: {score.wins}W / {score.losses}L / {score.ties}T
-          </li>
+        {Object.entries(leaderboard)
+          .sort(([, a], [, b]) => (b.wins - b.losses) - (a.wins - a.losses))
+          .map(([player, score]) => (
+            <li key={player} className="text-sm">
+              {player}: {score.wins}W / {score.losses}L / {score.ties}T &nbsp;
+              <span className="text-yellow-400 font-semibold">(Net: {score.wins - score.losses})</span>
+            </li>
         ))}
       </ul>
 
