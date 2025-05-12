@@ -14,6 +14,8 @@ export default function App() {
   const [resultKey, setResultKey] = useState(0);
   const [leaderboard, setLeaderboard] = useState({});
   const [globalBoard, setGlobalBoard] = useState([]);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [finalComputerChoice, setFinalComputerChoice] = useState(null);
 
   useEffect(() => {
     const storedName = Cookies.get("playerName");
@@ -41,17 +43,43 @@ export default function App() {
   };
 
   const play = (choice) => {
-    const comp = choices[Math.floor(Math.random() * 3)];
     setUserChoice(choice);
-    setComputerChoice(comp);
+    setComputerChoice(null);
+    setFinalComputerChoice(null);
+    setResult("");
+    setIsAnimating(true);
 
-    if (choice === comp) {
+    let counter = 0;
+    const animationSequence = [100, 150, 200, 250, 300, 400, 500, 600];
+
+    const playAnimationStep = () => {
+      const tempChoice = choices[Math.floor(Math.random() * 3)];
+      setComputerChoice(tempChoice);
+      counter++;
+      if (counter < animationSequence.length) {
+        setTimeout(playAnimationStep, animationSequence[counter]);
+      } else {
+        const finalChoice = choices[Math.floor(Math.random() * 3)];
+        setFinalComputerChoice(finalChoice);
+        setComputerChoice(finalChoice);
+        finalizeGame(choice, finalChoice);
+        setIsAnimating(false);
+      }
+    };
+
+    playAnimationStep();
+  };
+
+  const finalizeGame = (user, comp) => {
+    if (!comp) return;
+
+    if (user === comp) {
       setResult("It's a tie!");
       updateLeaderboard(0, 0, 1);
     } else if (
-      (choice === "rock" && comp === "scissors") ||
-      (choice === "paper" && comp === "rock") ||
-      (choice === "scissors" && comp === "paper")
+      (user === "rock" && comp === "scissors") ||
+      (user === "paper" && comp === "rock") ||
+      (user === "scissors" && comp === "paper")
     ) {
       setResult("You win!");
       updateLeaderboard(1, 0, 0);
@@ -59,7 +87,6 @@ export default function App() {
       setResult("You lose!");
       updateLeaderboard(0, 1, 0);
     }
-
     setResultKey(Date.now());
   };
 
@@ -135,7 +162,7 @@ export default function App() {
         {choices.map((choice) => (
           <button
             key={choice}
-            onClick={() => play(choice)}
+            onClick={() => !isAnimating && play(choice)}
             className="bg-blue-600 px-6 py-3 rounded capitalize flex flex-col items-center w-24 h-24 justify-center space-y-1 transform transition-transform duration-200 hover:scale-110 hover:rotate-3 hover:shadow-lg"
           >
             <span className="text-2xl">{getIcon(choice)}</span>
