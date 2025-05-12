@@ -19,13 +19,15 @@ export default function App() {
   useEffect(() => {
     const storedName = Cookies.get("playerName");
     if (storedName) setName(storedName);
-    fetchLeaderboard(db).then(setGlobalBoard);
+    fetchAndSetLeaderboard(storedName);
   }, []);
 
-  useEffect(() => {
-    const found = globalBoard.find((entry) => entry.name === name);
+  const fetchAndSetLeaderboard = async (userName) => {
+    const all = await fetchLeaderboard(db);
+    setGlobalBoard(all);
+    const found = all.find((entry) => entry.name === userName);
     if (found) setPlayerStats(found);
-  }, [globalBoard, name]);
+  };
 
   const updateLeaderboard = (winInc = 0, lossInc = 0, tieInc = 0) => {
     const updated = {
@@ -36,7 +38,7 @@ export default function App() {
     };
     setPlayerStats(updated);
     submitScore(db, name, winInc, lossInc, tieInc);
-    fetchLeaderboard(db).then(setGlobalBoard);
+    fetchAndSetLeaderboard(name);
   };
 
   const play = (choice) => {
@@ -89,6 +91,7 @@ export default function App() {
     if (!nameInput.trim()) return;
     setName(nameInput.trim());
     Cookies.set("playerName", nameInput.trim());
+    fetchAndSetLeaderboard(nameInput.trim());
   };
 
   const logout = () => {
