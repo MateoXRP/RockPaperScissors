@@ -137,8 +137,12 @@ export default function App() {
 
       {userChoice && computerChoice && (
         <div className="text-center mb-4">
-          <p>You chose: {capitalize(userChoice)}</p>
-          <p>Computer chose: {capitalize(computerChoice)}</p>
+          <p>
+            You chose: <span className="text-2xl">{getIcon(userChoice)}</span> {capitalize(userChoice)}
+          </p>
+          <p>
+            Computer chose: <span className="text-2xl">{getIcon(computerChoice)}</span> {capitalize(computerChoice)}
+          </p>
           <p
             key={resultKey}
             className="mt-2 font-semibold text-xl opacity-0 scale-90 animate-fadeIn"
