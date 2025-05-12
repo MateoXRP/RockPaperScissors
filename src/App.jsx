@@ -104,7 +104,9 @@ export default function App() {
   if (!name) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-4">
-        <h1 className="text-3xl font-bold mb-4">Enter Your Name</h1>
+        <h1 className="text-3xl font-bold mb-2 text-center">Play Rock, Paper, Scissors!</h1>
+        <div className="text-4xl mb-4">🪨 📄 ✂️</div>
+        <h2 className="text-xl font-semibold mb-2">Enter Your Name</h2>
         <input
           type="text"
           value={nameInput}
